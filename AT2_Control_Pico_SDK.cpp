@@ -12,10 +12,9 @@
 // Pins can be changed, see the GPIO function select table in the datasheet for information on GPIO assignments
 #define SPI_PORT spi0
 #define PIN_MISO 16
-#define PIN_CS   17
-#define PIN_SCK  18
+#define PIN_CS 17
+#define PIN_SCK 18
 #define PIN_MOSI 19
-
 
 #define OLED_HEIGHT 64
 #define OLED_WIDTH 128
@@ -31,32 +30,42 @@
 SH1106 oled = SH1106(i2c1, OLED_I2C_ADDR, OLED_WIDTH, OLED_HEIGHT);
 // SSD1306 oled = SSD1306(i2c1, OLED_I2C_ADDR, OLED_WIDTH, OLED_HEIGHT);
 
-
-
-
-
+#define BUTTON_0 9
+#define BUTTON_1 8
+#define BUTTON_2 7
+#define BUTTON_3 6
 
 int main()
 {
     stdio_init_all();
 
     // Initialise the Wi-Fi chip
-    if (cyw43_arch_init()) {
+    if (cyw43_arch_init())
+    {
         printf("Wi-Fi init failed\n");
         return -1;
     }
 
     // SPI initialisation. This example will use SPI at 1MHz.
-    spi_init(SPI_PORT, 1000*1000);
+    spi_init(SPI_PORT, 1000 * 1000);
     gpio_set_function(PIN_MISO, GPIO_FUNC_SPI);
-    gpio_set_function(PIN_CS,   GPIO_FUNC_SIO);
-    gpio_set_function(PIN_SCK,  GPIO_FUNC_SPI);
+    gpio_set_function(PIN_CS, GPIO_FUNC_SIO);
+    gpio_set_function(PIN_SCK, GPIO_FUNC_SPI);
     gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI);
-    
+
     // Chip select is active-low, so we'll initialise it to a driven-high state
     gpio_set_dir(PIN_CS, GPIO_OUT);
     gpio_put(PIN_CS, 1);
     // For more examples of SPI use see https://github.com/raspberrypi/pico-examples/tree/master/spi
+
+    gpio_set_function(BUTTON_0, GPIO_FUNC_SIO);
+    gpio_set_function(BUTTON_1, GPIO_FUNC_SIO);
+    gpio_set_function(BUTTON_2, GPIO_FUNC_SIO);
+    gpio_set_function(BUTTON_3, GPIO_FUNC_SIO);
+    gpio_set_dir(BUTTON_0, GPIO_IN);
+    gpio_set_dir(BUTTON_1, GPIO_IN);
+    gpio_set_dir(BUTTON_2, GPIO_IN);
+    gpio_set_dir(BUTTON_3, GPIO_IN);
 
     // useful information for picotool
     bi_decl(bi_2pins_with_func(SDA_PIN, CLK_PIN, GPIO_FUNC_I2C));
@@ -72,36 +81,67 @@ int main()
     oled.begin();
 
     oled.display();
-    oled.writePixel(0, 0, 1);
-    oled.drawCircle(10, 10, 5, 1);
-    oled.setTextSize(1);
+    oled.drawCircle(80, 30, 10, 1);
+    oled.setTextSize(2);
     oled.setTextColor(1);
     oled.write('T');
-    oled.write('e');
-    oled.write('s');
-    oled.write('t');
+    oled.write('a');
+    oled.write('n');
+    oled.write('k');
+    oled.write(' ');
+    oled.write('1');
+    oled.write('\n');
+    oled.write('8');
+    oled.write('0');
+    oled.write('%');
+    oled.setTextSize(1);
+    oled.setCursor(0, 57);
+    oled.write('0');
+    oled.setCursor(30, 57);
+    oled.write('1');
+    oled.setCursor(90, 57);
+    oled.write('2');
+    oled.setCursor(120, 57);
+    oled.write('3');
+
     oled.display();
     // Watchdog example code
-    if (watchdog_caused_reboot()) {
+    if (watchdog_caused_reboot())
+    {
         printf("Rebooted by Watchdog!\n");
         // Whatever action you may take if a watchdog caused a reboot
     }
-    
+
     // Enable the watchdog, requiring the watchdog to be updated every 100ms or the chip will reboot
     // second arg is pause on debug which means the watchdog will pause when stepping through code
     watchdog_enable(3000, 1);
-    
+
     // You need to call this function at least more often than the 100ms in the enable call to prevent a reboot
     watchdog_update();
 
-    
-
-    while (true) {
-        printf("Hello, world!\n");
-        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
-        sleep_ms(500);
-        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
-        sleep_ms(500);
+    while (true)
+    {
+        // printf("Hello, world!\n");
+        // cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
+        // sleep_ms(500);
+        // cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
+        // sleep_ms(500);
+        if (gpio_get(BUTTON_0) == true)
+        {
+            printf("Button 0 pressed\n");
+        }
+        else if (gpio_get(BUTTON_1) == true)
+        {
+            printf("Button 1 pressed\n");
+        }
+        else if (gpio_get(BUTTON_2) == true)
+        {
+            printf("Button 2 pressed\n");
+        }
+        else if (gpio_get(BUTTON_3) == true)
+        {
+            printf("Button 3 pressed\n");
+        }
         watchdog_update();
     }
 }
