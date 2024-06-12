@@ -6,6 +6,15 @@
 #include "hardware/watchdog.h"
 #include "pico/cyw43_arch.h"
 #include "SH1106.h"
+#include "Frame.h"
+#include "Tank.h"
+#include "lfs.h"
+#include <pfs.h>
+#include "FrameManager.h"
+
+// flash filesystem size
+#define ROOT_SIZE 0x100000
+#define ROOT_OFFSET 0x100000
 
 // SPI Defines
 // We are going to use SPI 0, and allocate it to the following GPIO pins
@@ -28,16 +37,46 @@
 #define CLK_PIN 3
 
 SH1106 oled = SH1106(i2c1, OLED_I2C_ADDR, OLED_WIDTH, OLED_HEIGHT);
-// SSD1306 oled = SSD1306(i2c1, OLED_I2C_ADDR, OLED_WIDTH, OLED_HEIGHT);
-
-#define BUTTON_0 9
-#define BUTTON_1 8
-#define BUTTON_2 7
-#define BUTTON_3 6
 
 int main()
 {
     stdio_init_all();
+
+    struct pfs_pfs *pfs;
+    struct lfs_config cfg;
+    ffs_pico_createcfg(&cfg, ROOT_OFFSET, ROOT_SIZE);
+    pfs = pfs_ffs_create(&cfg);
+    pfs_mount(pfs, "/"); // check if mounts
+
+    FILE *f2 = fopen("/test.txt", "w");
+    if (f2)
+    {
+        printf("F2 opened\n");
+        char buffer[] = "Control Test 2";
+        fwrite(buffer, sizeof(char), sizeof(buffer), f2);
+        fclose(f2);
+        printf("F2 written to and closed\n");
+    }
+    else
+    {
+        printf("F2 could not be opened\n");
+    }
+
+    FILE *f1 = fopen("/test.txt", "r");
+    if (f1)
+    {
+        printf("F1 opened\n");
+        fseek(f1, 0, SEEK_END);
+        auto f1Size = ftell(f1);
+        printf("f1size: %u\n", f1Size);
+        rewind(f1);
+
+        char *buffer = (char *)malloc(sizeof(char) * f1Size);
+        fread(buffer, 1, f1Size, f1);
+        printf(buffer);
+        free(buffer);
+        fclose(f1);
+    }
 
     // Initialise the Wi-Fi chip
     if (cyw43_arch_init())
@@ -46,29 +85,15 @@ int main()
         return -1;
     }
 
-    // SPI initialisation. This example will use SPI at 1MHz.
+    // SPI initialisation at 1MHz.
     spi_init(SPI_PORT, 1000 * 1000);
     gpio_set_function(PIN_MISO, GPIO_FUNC_SPI);
     gpio_set_function(PIN_CS, GPIO_FUNC_SIO);
     gpio_set_function(PIN_SCK, GPIO_FUNC_SPI);
     gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI);
-
-    // Chip select is active-low, so we'll initialise it to a driven-high state
-    gpio_set_dir(PIN_CS, GPIO_OUT);
+    gpio_set_dir(PIN_CS, GPIO_OUT); // Chip select is active-low, so we'll initialise it to a driven-high state
     gpio_put(PIN_CS, 1);
-    // For more examples of SPI use see https://github.com/raspberrypi/pico-examples/tree/master/spi
-
-    gpio_set_function(BUTTON_0, GPIO_FUNC_SIO);
-    gpio_set_function(BUTTON_1, GPIO_FUNC_SIO);
-    gpio_set_function(BUTTON_2, GPIO_FUNC_SIO);
-    gpio_set_function(BUTTON_3, GPIO_FUNC_SIO);
-    gpio_set_dir(BUTTON_0, GPIO_IN);
-    gpio_set_dir(BUTTON_1, GPIO_IN);
-    gpio_set_dir(BUTTON_2, GPIO_IN);
-    gpio_set_dir(BUTTON_3, GPIO_IN);
-
-    // useful information for picotool
-    bi_decl(bi_2pins_with_func(SDA_PIN, CLK_PIN, GPIO_FUNC_I2C));
+    bi_decl(bi_2pins_with_func(SDA_PIN, CLK_PIN, GPIO_FUNC_I2C)); // useful information for picotool
     bi_decl(bi_program_description("OLED driver I2C example for the Raspberry Pi Pico"));
 
     // I2C is "open drain", pull ups to keep signal high when no data is being
@@ -79,44 +104,42 @@ int main()
     gpio_pull_up(CLK_PIN);
 
     oled.begin();
+    oled.display();
+
+    FrameManager frameManager = FrameManager(&oled);
+    frameManager.setFrame(new Tank(&oled, &frameManager));
+    frameManager.begin();
+
+    // oled.drawCircle(80, 30, 10, 1);
+    // oled.setTextSize(2);
+    // oled.setTextColor(1);
+    // oled.write('T');
+    // oled.write('a');
+    // oled.write('n');
+    // oled.write('k');
+    // oled.write(' ');
+    // oled.write('1');
+    // oled.write('\n');
+    // oled.write('8');
+    // oled.write('0');
+    // oled.write('%');
+    // oled.setTextSize(1);
+    // oled.setCursor(0, 57);
+    // oled.write('0');
+    // oled.setCursor(30, 57);
+    // oled.write('1');
+    // oled.setCursor(90, 57);
+    // oled.write('2');
+    // oled.setCursor(120, 57);
+    // oled.write('3');
 
     oled.display();
-    oled.drawCircle(80, 30, 10, 1);
-    oled.setTextSize(2);
-    oled.setTextColor(1);
-    oled.write('T');
-    oled.write('a');
-    oled.write('n');
-    oled.write('k');
-    oled.write(' ');
-    oled.write('1');
-    oled.write('\n');
-    oled.write('8');
-    oled.write('0');
-    oled.write('%');
-    oled.setTextSize(1);
-    oled.setCursor(0, 57);
-    oled.write('0');
-    oled.setCursor(30, 57);
-    oled.write('1');
-    oled.setCursor(90, 57);
-    oled.write('2');
-    oled.setCursor(120, 57);
-    oled.write('3');
-
-    oled.display();
-    // Watchdog example code
     if (watchdog_caused_reboot())
     {
         printf("Rebooted by Watchdog!\n");
-        // Whatever action you may take if a watchdog caused a reboot
     }
 
-    // Enable the watchdog, requiring the watchdog to be updated every 100ms or the chip will reboot
-    // second arg is pause on debug which means the watchdog will pause when stepping through code
-    watchdog_enable(3000, 1);
-
-    // You need to call this function at least more often than the 100ms in the enable call to prevent a reboot
+    watchdog_enable(3000, true);
     watchdog_update();
 
     while (true)
@@ -126,22 +149,7 @@ int main()
         // sleep_ms(500);
         // cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
         // sleep_ms(500);
-        if (gpio_get(BUTTON_0) == true)
-        {
-            printf("Button 0 pressed\n");
-        }
-        else if (gpio_get(BUTTON_1) == true)
-        {
-            printf("Button 1 pressed\n");
-        }
-        else if (gpio_get(BUTTON_2) == true)
-        {
-            printf("Button 2 pressed\n");
-        }
-        else if (gpio_get(BUTTON_3) == true)
-        {
-            printf("Button 3 pressed\n");
-        }
         watchdog_update();
+        frameManager.tick();
     }
 }

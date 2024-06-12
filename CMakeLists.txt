@@ -38,9 +38,11 @@ project(AT2_Control_Pico_SDK C CXX ASM)
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
+add_subdirectory (lib/pico-filesystem)
 add_subdirectory(lib/Adafruit_BusIO)
 add_subdirectory(lib/Adafruit_GFX)
 add_subdirectory(lib/SH1106)
+add_subdirectory(lib/FrameManager)
 add_executable(AT2_Control_Pico_SDK AT2_Control_Pico_SDK.cpp )
 
 pico_set_program_name(AT2_Control_Pico_SDK "AT2_Control_Pico_SDK")
@@ -66,9 +68,11 @@ target_link_libraries(AT2_Control_Pico_SDK
         hardware_i2c
         hardware_watchdog
         pico_cyw43_arch_none
+        flash_filesystem
         Adafruit_BusIO
         Adafruit_GFX
         SH1106
+        FrameManager
         )
 
 pico_add_extra_outputs(AT2_Control_Pico_SDK)
