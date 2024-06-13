@@ -1,7 +1,6 @@
-[submodule "json"]
-	path = lib/json
-	url = https://github.com/nlohmann/json
-
-[submodule "pico-filesystem"]
+[submodule "lib/pico-filesystem"]
 	path = lib/pico-filesystem
-	url = https://github.com/Memotech-Bill/pico-filesystem
+	url = https://github.com/Memotech-Bill/pico-filesystem.git
+[submodule "lib/json"]
+	path = lib/json
+	url = https://github.com/nlohmann/json.git
