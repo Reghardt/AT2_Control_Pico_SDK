@@ -11,10 +11,12 @@
 #include "lfs.h"
 #include <pfs.h>
 #include "FrameManager.h"
+#include <nlohmann/json.hpp>
+using json = nlohmann::json;
 
 // flash filesystem size
-#define ROOT_SIZE 0x100000
-#define ROOT_OFFSET 0x100000
+#define ROOT_SIZE 0x20000    // flash LFS size
+#define ROOT_OFFSET 0x1E0000 // offset from start of flash
 
 // SPI Defines
 // We are going to use SPI 0, and allocate it to the following GPIO pins
@@ -42,11 +44,17 @@ int main()
 {
     stdio_init_all();
 
+    json j;
+    j["pi"] = 3.141;
+
+    printf(j.dump().c_str());
+
     struct pfs_pfs *pfs;
     struct lfs_config cfg;
     ffs_pico_createcfg(&cfg, ROOT_OFFSET, ROOT_SIZE);
     pfs = pfs_ffs_create(&cfg);
-    pfs_mount(pfs, "/"); // check if mounts
+    auto mountRes = pfs_mount(pfs, "/"); // check if mounts
+    printf("Mount result: %u\n", mountRes);
 
     FILE *f2 = fopen("/test.txt", "w");
     if (f2)

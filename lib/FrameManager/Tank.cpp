@@ -11,6 +11,15 @@ Tank::~Tank()
 void Tank::render()
 {
     oled->drawCircle(40, 40, 8, 1);
+    oled->setTextColor(1);
+    oled->setTextSize(2);
+    oled->setCursor(0, 0);
+    oled->write('P');
+    oled->write('a');
+    oled->write('g');
+    oled->write('e');
+    oled->write(' ');
+    oled->write('1');
     oled->display();
 }
 

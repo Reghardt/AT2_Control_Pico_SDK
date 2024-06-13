@@ -12,6 +12,15 @@ FillWhen::~FillWhen()
 void FillWhen::render()
 {
     oled->drawCircle(40, 40, 10, 1);
+    oled->setTextColor(1);
+    oled->setTextSize(2);
+    oled->setCursor(0, 0);
+    oled->write('P');
+    oled->write('a');
+    oled->write('g');
+    oled->write('e');
+    oled->write(' ');
+    oled->write('2');
     oled->display();
 }
 

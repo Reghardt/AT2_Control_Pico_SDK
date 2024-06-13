@@ -1,0 +1,60 @@
+ 
+2mb flash
+Start address:
+0x1000 0000 which is 256mb from the start of the 32 bit address space
+
+End address:
+0x1020 0000 which is 2mb from the start of the flash
+
+The difference between the end and start address is:
+0x20 0000 or d2097152.
+
+2mb * 1024 = 2048 kb
+2048 kb * 1024 = 2097152 bytes
+
+2097152 bytes = 2mb
+
+--
+
+current LFS ROOT_OFFSET and ROOT_SIZE
+ROOT_OFFSET = 0x10 0000
+ROOT_SIZE = 0x10 0000
+
+exactly half of the picos flash is used by lfs, ie 1mb or 1048576 bytes
+
+The pico's flash is made of pages of size 256 bytes.
+So 2097152 bytes flash size / 256 bytes page size = 8192 pages.
+
+If I want to use 512 pages for lfs, or 131072 bytes (or 256 bytes * 512 pages = 0.125mb).
+ROOT_SIZE would then be 0x2 0000, ie 131072 bytes.
+
+The ROOT_OFFSET, or remaining flash for code would be
+0x1020 0000 (total size) - 0x2 0000 (lfs size) = 0x101E 0000
+
+Ignoring the 256mb offset, the size is 0x1E 0000 (or 1966080 bytes)
+1966080 bytes / 256 bytes page size = 7680 pages
+
+So 7680 pages for code and 512 pages for persistent data = 8192
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

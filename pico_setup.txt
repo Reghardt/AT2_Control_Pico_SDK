@@ -1,0 +1,22 @@
+
+install:
+    openocd
+    gdb
+    arm-none-eabi-gdb or gdb-multiarch
+
+In vs code:
+    install pico extention
+    install recomended extentions
+        All extentions are:
+            x
+            y
+            z
+
+
+
+Might be a configure c make prompt
+in cmake extention:
+    under Configuration change kit to pico
+
+in .vscode launch.json:
+    "gdbPath": "arm-none-eabi-gdb",

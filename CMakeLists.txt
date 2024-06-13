@@ -6,6 +6,9 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# reccomended from json library
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+
 # Initialise pico_sdk from installed location
 # (note this can come from environment, CMake cache etc)
 
@@ -43,6 +46,7 @@ add_subdirectory(lib/Adafruit_BusIO)
 add_subdirectory(lib/Adafruit_GFX)
 add_subdirectory(lib/SH1106)
 add_subdirectory(lib/FrameManager)
+add_subdirectory(lib/json)
 add_executable(AT2_Control_Pico_SDK AT2_Control_Pico_SDK.cpp )
 
 pico_set_program_name(AT2_Control_Pico_SDK "AT2_Control_Pico_SDK")
@@ -69,6 +73,7 @@ target_link_libraries(AT2_Control_Pico_SDK
         hardware_watchdog
         pico_cyw43_arch_none
         flash_filesystem
+        nlohmann_json
         Adafruit_BusIO
         Adafruit_GFX
         SH1106
