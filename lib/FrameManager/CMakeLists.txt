@@ -10,5 +10,5 @@ add_library(FrameManager STATIC
 )
 
 # Inherit the include directories from the Pico SDK
-target_link_libraries(FrameManager pico_stdlib SH1106)
+target_link_libraries(FrameManager pico_stdlib SH110X)
 target_include_directories(FrameManager PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
