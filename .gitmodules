@@ -4,3 +4,6 @@
 [submodule "lib/json"]
 	path = lib/json
 	url = https://github.com/nlohmann/json.git
+[submodule "Pi-Pico-SDK-Adafruit-SH110x"]
+	path = lib/Pi-Pico-SDK-Adafruit-SH110x
+	url = https://github.com/Reghardt/Pi-Pico-SDK-Adafruit-SH110x.git
