@@ -42,8 +42,7 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 add_subdirectory (lib/pico-filesystem)
-# add_subdirectory(lib/Adafruit_BusIO)
-# add_subdirectory(lib/Adafruit_GFX)
+add_subdirectory(lib/Pi-Pico-SDK-LoRa)
 add_subdirectory(lib/Pi-Pico-SDK-Adafruit-SH110x)
 add_subdirectory(lib/FrameManager)
 add_subdirectory(lib/json)
@@ -76,6 +75,7 @@ target_link_libraries(AT2_Control_Pico_SDK
         nlohmann_json
         # Adafruit_BusIO
         # Adafruit_GFX
+        LoRa
         SH110X
         FrameManager
         )

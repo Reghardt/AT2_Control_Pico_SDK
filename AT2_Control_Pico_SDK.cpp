@@ -12,11 +12,13 @@
 #include <pfs.h>
 #include "FrameManager.h"
 #include <nlohmann/json.hpp>
+#include "LoRa.h"
+#include "hardware/gpio.h"
 
 using json = nlohmann::json;
 
 // flash filesystem size
-#define ROOT_SIZE 0x20000    // flash LFS size
+#define ROOT_SIZE 0x20000    // flash LFS size, 0.125mb
 #define ROOT_OFFSET 0x1E0000 // offset from start of flash
 
 // SPI Defines
@@ -40,6 +42,18 @@ using json = nlohmann::json;
 #define CLK_PIN 3
 
 SH1106 oled = SH1106(i2c1, OLED_I2C_ADDR, OLED_WIDTH, OLED_HEIGHT);
+LoRaClass loraClass = LoRaClass();
+
+static char event_str[128];
+
+static const char *gpio_irq_str[] = {
+    "LEVEL_LOW",  // 0x1
+    "LEVEL_HIGH", // 0x2
+    "EDGE_FALL",  // 0x4
+    "EDGE_RISE"   // 0x8
+};
+
+void gpio_callback(uint gpio, uint32_t events);
 
 int main()
 {
@@ -54,37 +68,37 @@ int main()
     struct lfs_config cfg;
     ffs_pico_createcfg(&cfg, ROOT_OFFSET, ROOT_SIZE);
     pfs = pfs_ffs_create(&cfg);
-    auto mountRes = pfs_mount(pfs, "/"); // check if mounts
+    int mountRes = pfs_mount(pfs, "/"); // check if mounts
     printf("Mount result: %u\n", mountRes);
 
-    FILE *f2 = fopen("/test.txt", "w");
-    if (f2)
+    FILE *wFile = fopen("/test.txt", "w");
+    if (wFile)
     {
-        printf("F2 opened\n");
-        char buffer[] = "Control Test 2";
-        fwrite(buffer, sizeof(char), sizeof(buffer), f2);
-        fclose(f2);
-        printf("F2 written to and closed\n");
+        printf("wFile opened\n");
+        char buffer[] = "Some text to write";
+        fwrite(buffer, sizeof(char), sizeof(buffer), wFile);
+        fclose(wFile);
+        printf("wFile written to and closed\n");
     }
     else
     {
-        printf("F2 could not be opened\n");
+        printf("F2 could not be opened for writing\n");
     }
 
-    FILE *f1 = fopen("/test.txt", "r");
-    if (f1)
+    FILE *rFile = fopen("/test.txt", "r");
+    if (rFile)
     {
-        printf("F1 opened\n");
-        fseek(f1, 0, SEEK_END);
-        auto f1Size = ftell(f1);
-        printf("f1size: %u\n", f1Size);
-        rewind(f1);
+        printf("rFile opened\n");
+        fseek(rFile, 0, SEEK_END);  // file stream pos to EOF
+        long f1Size = ftell(rFile); // get file size
+        printf("rFile size: %u\n", f1Size);
+        rewind(rFile); // reset file stream pos to SOF
 
         char *buffer = (char *)malloc(sizeof(char) * f1Size);
-        fread(buffer, 1, f1Size, f1);
+        fread(buffer, 1, f1Size, rFile);
         printf(buffer);
         free(buffer);
-        fclose(f1);
+        fclose(rFile);
     }
 
     // Initialise the Wi-Fi chip
@@ -94,16 +108,17 @@ int main()
         return -1;
     }
 
-    // SPI initialisation at 1MHz.
-    spi_init(SPI_PORT, 1000 * 1000);
-    gpio_set_function(PIN_MISO, GPIO_FUNC_SPI);
-    gpio_set_function(PIN_CS, GPIO_FUNC_SIO);
-    gpio_set_function(PIN_SCK, GPIO_FUNC_SPI);
-    gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI);
-    gpio_set_dir(PIN_CS, GPIO_OUT); // Chip select is active-low, so we'll initialise it to a driven-high state
-    gpio_put(PIN_CS, 1);
-    bi_decl(bi_2pins_with_func(SDA_PIN, CLK_PIN, GPIO_FUNC_I2C)); // useful information for picotool
-    bi_decl(bi_program_description("OLED driver I2C example for the Raspberry Pi Pico"));
+    gpio_set_irq_callback(&gpio_callback);
+
+    loraClass.begin(868E6);
+    loraClass.setTxPower(13);
+    loraClass.setSignalBandwidth(62.5E3);
+    loraClass.setCodingRate4(5);
+    loraClass.setSpreadingFactor(7);
+    loraClass.setGain(6);
+    loraClass.enableCrc();
+    loraClass.enableInterruptOnReceive();
+    loraClass.receive();
 
     // I2C is "open drain", pull ups to keep signal high when no data is being
     i2c_init(i2c1, I2C_CLK * 1000);
@@ -160,5 +175,44 @@ int main()
         // sleep_ms(500);
         watchdog_update();
         frameManager.tick();
+    }
+}
+
+void gpio_event_string(char *buf, uint32_t events)
+{
+    for (uint i = 0; i < 4; i++)
+    {
+        uint mask = (1 << i);
+        if (events & mask)
+        {
+            // Copy this event string into the user string
+            const char *event_str = gpio_irq_str[i];
+            while (*event_str != '\0')
+            {
+                *buf++ = *event_str++;
+            }
+            events &= ~mask;
+
+            // If more events add ", "
+            if (events)
+            {
+                *buf++ = ',';
+                *buf++ = ' ';
+            }
+        }
+    }
+    *buf++ = '\0';
+}
+
+void gpio_callback(uint gpio, uint32_t events)
+{
+    // Put the GPIO event(s) that just happened into event_str
+    // so we can print it
+    gpio_event_string(event_str, events);
+    printf("GPIO %d %s\n", gpio, event_str);
+
+    if (gpio == 10)
+    {
+        loraClass.handleDio0Rise();
     }
 }
