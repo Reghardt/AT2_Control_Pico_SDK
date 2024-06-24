@@ -1,6 +1,3 @@
-[submodule "lib/pico-filesystem"]
-	path = lib/pico-filesystem
-	url = https://github.com/Memotech-Bill/pico-filesystem.git
 [submodule "lib/json"]
 	path = lib/json
 	url = https://github.com/nlohmann/json.git
@@ -11,3 +8,6 @@
 [submodule "lib/Pi-Pico-SDK-LoRa"]
 	path = lib/Pi-Pico-SDK-LoRa
 	url = https://github.com/Reghardt/Pi-Pico-SDK-LoRa.git
+[submodule "lib/PLFS/pico-filesystem"]
+	path = lib/PLFS/pico-filesystem
+	url = https://github.com/Memotech-Bill/pico-filesystem.git

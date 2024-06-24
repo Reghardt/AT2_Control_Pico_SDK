@@ -6,7 +6,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# reccomended from json library
+# recomended from json library
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 
 # Initialise pico_sdk from installed location
@@ -41,12 +41,13 @@ project(AT2_Control_Pico_SDK C CXX ASM)
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
-add_subdirectory (lib/pico-filesystem)
+# add_subdirectory (lib/pico-filesystem)
 add_subdirectory(lib/Pi-Pico-SDK-LoRa)
 add_subdirectory(lib/Pi-Pico-SDK-Adafruit-SH110x)
 add_subdirectory(lib/FrameManager)
 add_subdirectory(lib/json)
-add_executable(AT2_Control_Pico_SDK AT2_Control_Pico_SDK.cpp )
+add_subdirectory(lib/PLFS)
+add_executable(AT2_Control_Pico_SDK AT2_Control_Pico_SDK.cpp)
 
 pico_set_program_name(AT2_Control_Pico_SDK "AT2_Control_Pico_SDK")
 pico_set_program_version(AT2_Control_Pico_SDK "0.1")
@@ -71,13 +72,14 @@ target_link_libraries(AT2_Control_Pico_SDK
         hardware_i2c
         hardware_watchdog
         pico_cyw43_arch_none
-        flash_filesystem
+        # flash_filesystem
         nlohmann_json
         # Adafruit_BusIO
         # Adafruit_GFX
         LoRa
         SH110X
         FrameManager
+        PLFS
         )
 
 pico_add_extra_outputs(AT2_Control_Pico_SDK)

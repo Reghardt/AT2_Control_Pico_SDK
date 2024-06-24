@@ -7,6 +7,7 @@ add_library(FrameManager STATIC
     Frame.cpp
     Tank.cpp
     FillWhen.cpp
+    TankSelector.cpp
 )
 
 # Inherit the include directories from the Pico SDK

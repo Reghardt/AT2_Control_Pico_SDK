@@ -8,17 +8,18 @@
 #include "SH1106.h"
 #include "Frame.h"
 #include "Tank.h"
-#include "lfs.h"
-#include <pfs.h>
+// #include "lfs.h"
+// #include <pfs.h>
 #include "FrameManager.h"
 #include <nlohmann/json.hpp>
 #include "LoRa.h"
 #include "hardware/gpio.h"
+#include "TankSelector.h"
 
 using json = nlohmann::json;
 
 // flash filesystem size
-#define ROOT_SIZE 0x20000    // flash LFS size, 0.125mb
+#define ROOT_SIZE 0x20000    // flash LFS size, last 0.125mb of flash
 #define ROOT_OFFSET 0x1E0000 // offset from start of flash
 
 #define OLED_HEIGHT 64
@@ -35,25 +36,38 @@ using json = nlohmann::json;
 #define LORA_DIO0_PIN 10
 
 SH1106 oled = SH1106(i2c1, OLED_I2C_ADDR, OLED_WIDTH, OLED_HEIGHT);
-LoRa loraClass = LoRa(spi1, LORA_CS_PIN, LORA_RST_PIN, LORA_DIO0_PIN);
+LoRa loRa = LoRa(spi1, LORA_CS_PIN, LORA_RST_PIN, LORA_DIO0_PIN);
 
 void gpio_irq_callback(uint gpio, uint32_t events)
 {
     printf("IRQ: GPIO %d\n", gpio);
     if (gpio == LORA_DIO0_PIN)
     {
-        loraClass.handleDio0Rise();
+        loRa.handleDio0Rise();
     }
 }
 
 void loraOnReceive(int packetSize)
 {
+    std::vector<std::uint8_t> v_msgpack;
     for (int i = 0; i < packetSize; i++)
     {
-        printf("Read: %c\n", loraClass.read());
+        v_msgpack.push_back(loRa.read());
     }
-    int rssi = loraClass.packetRssi();
-    int snr = loraClass.packetSnr();
+    json j_from_msgpack = json::from_msgpack(v_msgpack, true, false);
+
+    if (j_from_msgpack.is_discarded())
+    {
+        printf("Discarded\n");
+        return;
+    }
+    else
+    {
+        printf("\nAccepted\n");
+        printf("%s\n", j_from_msgpack.dump().c_str());
+        printf("RSSI: %d\n", loRa.packetRssi());
+        printf("SNR : %d\n", loRa.packetSnr());
+    }
 }
 
 int main()
@@ -71,15 +85,15 @@ int main()
         return -1;
     }
 
-    loraClass.begin(868E6);
-    loraClass.setTxPower(13);
-    loraClass.setSignalBandwidth(62.5E3);
-    loraClass.setCodingRate4(5);
-    loraClass.setSpreadingFactor(7);
-    loraClass.setGain(6);
-    loraClass.enableCrc();
-    loraClass.onReceive(&loraOnReceive);
-    loraClass.receive();
+    loRa.begin(868E6);
+    loRa.setTxPower(13);
+    loRa.setSignalBandwidth(62.5E3);
+    loRa.setCodingRate4(5);
+    loRa.setSpreadingFactor(7);
+    loRa.setGain(6);
+    loRa.enableCrc();
+    loRa.onReceive(&loraOnReceive);
+    loRa.receive();
 
     gpio_set_irq_callback(&gpio_irq_callback);
 
@@ -93,7 +107,7 @@ int main()
     oled.display();
 
     FrameManager frameManager = FrameManager(&oled);
-    frameManager.setFrame(new Tank(&oled, &frameManager));
+    frameManager.setFrame(new TankSelector(&oled, &frameManager));
     frameManager.begin();
 
     oled.display();
