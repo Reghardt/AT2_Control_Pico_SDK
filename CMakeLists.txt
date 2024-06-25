@@ -47,6 +47,7 @@ add_subdirectory(lib/Pi-Pico-SDK-Adafruit-SH110x)
 add_subdirectory(lib/FrameManager)
 add_subdirectory(lib/json)
 add_subdirectory(lib/PLFS)
+add_subdirectory(lib/TankCFG)
 add_executable(AT2_Control_Pico_SDK AT2_Control_Pico_SDK.cpp)
 
 pico_set_program_name(AT2_Control_Pico_SDK "AT2_Control_Pico_SDK")
@@ -80,6 +81,7 @@ target_link_libraries(AT2_Control_Pico_SDK
         SH110X
         FrameManager
         PLFS
+        TankCFG
         )
 
 pico_add_extra_outputs(AT2_Control_Pico_SDK)

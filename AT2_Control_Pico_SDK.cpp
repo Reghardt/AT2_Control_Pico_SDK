@@ -15,6 +15,7 @@
 #include "LoRa.h"
 #include "hardware/gpio.h"
 #include "TankSelector.h"
+#include "TankCFG.h"
 
 using json = nlohmann::json;
 
@@ -37,6 +38,7 @@ using json = nlohmann::json;
 
 SH1106 oled = SH1106(i2c1, OLED_I2C_ADDR, OLED_WIDTH, OLED_HEIGHT);
 LoRa loRa = LoRa(spi1, LORA_CS_PIN, LORA_RST_PIN, LORA_DIO0_PIN);
+// TankCFG tankCFG = TankCFG();
 
 void gpio_irq_callback(uint gpio, uint32_t events)
 {
@@ -73,11 +75,10 @@ void loraOnReceive(int packetSize)
 int main()
 {
     stdio_init_all();
+    // tankCFG.begin();
 
-    json j;
-    j["pi"] = 3.141;
-
-    printf(j.dump().c_str());
+    printf("Start fill when: %u\n", TankCFG::getStartFillWhen());
+    printf("Stop fill when: %u\n", TankCFG::getStopFillWhen());
 
     if (cyw43_arch_init())
     {

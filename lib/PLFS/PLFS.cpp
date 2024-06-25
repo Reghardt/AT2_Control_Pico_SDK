@@ -1,52 +1,79 @@
 #include "PLFS.h"
 
-PLFS::PLFS()
+bool PLFS::mounted = false;
+
+void PLFS::mount()
 {
     struct pfs_pfs *pfs;
     struct lfs_config cfg;
     ffs_pico_createcfg(&cfg, ROOT_OFFSET, ROOT_SIZE);
     pfs = pfs_ffs_create(&cfg);
-    int mountRes = pfs_mount(pfs, "/"); // check if mounts
-    printf("Mount result: %u\n", mountRes);
-}
-
-PLFS::~PLFS()
-{
-}
-
-bool PLFS::read(const char *fileName)
-{
-    FILE *rFile = fopen(fileName, "r");
-    if (rFile)
+    int pfs_mount_result = pfs_mount(pfs, "/");
+    if (pfs_mount_result != 0) // zero on success
     {
-        printf("rFile opened\n");
-        fseek(rFile, 0, SEEK_END);  // file stream pos to EOF
-        long f1Size = ftell(rFile); // get file size
-        printf("rFile size: %u\n", f1Size);
-        rewind(rFile); // reset file stream pos to SOF
-
-        char *buffer = (char *)malloc(sizeof(char) * f1Size);
-        fread(buffer, 1, f1Size, rFile);
-
-        printf(buffer);
-        free(buffer);
-        fclose(rFile);
-        return true;
+        while (true)
+        {
+            printf("ERROR: File system could not be mounted: %i\n", pfs_mount_result);
+            sleep_ms(1000);
+        }
     }
     else
     {
-        return false;
+        printf("File system mounted\n");
+        mounted = true;
     }
 }
 
-bool PLFS::write(const char *fileName)
+/**
+ * Reads specified file's content into buffer. Returns bytes read.
+ */
+uint16_t PLFS::read(const char *fileName, char *&buffer)
 {
+    // mount if not mounted
+    if (mounted == false)
+    {
+        mount();
+    }
+
+    // try to open the file for reading
+    FILE *rFile = fopen(fileName, "r");
+
+    if (rFile)
+    {
+        printf("rFile opened\n");
+        fseek(rFile, 0, SEEK_END);    // file stream pos to EOF
+        long fileSize = ftell(rFile); // get file size
+        printf("rFile size: %u\n", fileSize);
+        rewind(rFile); // reset file stream pos to SOF
+
+        if (fileSize < 1)
+        {
+            return 0;
+        }
+
+        buffer = (char *)malloc(sizeof(char) * fileSize);
+        fread(buffer, 1, fileSize, rFile);
+        fclose(rFile);
+        return fileSize;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+bool PLFS::write(const char *fileName, const char *buffer, uint8_t length)
+{
+    if (mounted == false)
+    {
+        mount();
+    }
+
     FILE *wFile = fopen(fileName, "w"); // "w" erases file if it already exists
     if (wFile)
     {
         printf("wFile opened\n");
-        char buffer[] = "Some text to write";
-        fwrite(buffer, sizeof(char), sizeof(buffer), wFile);
+        fwrite(buffer, sizeof(char), length, wFile);
         fclose(wFile);
         printf("wFile written to and closed\n");
         return true;
