@@ -1,14 +1,15 @@
 #pragma once
 #include "Frame.h"
+#include "WaterDepthFrame.h"
 #include "StartFillWhenFrame.h"
 
-class TankSelector : public Frame
+class StopFillWhenFrame : public Frame
 {
 private:
     /* data */
 public:
-    TankSelector(SH1106 *oled, FrameManager *frameManager);
-    ~TankSelector();
+    StopFillWhenFrame(SH1106 *oled, FrameManager *frameManager);
+    ~StopFillWhenFrame();
 
     void render();
 

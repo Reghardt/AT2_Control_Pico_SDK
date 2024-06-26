@@ -21,4 +21,6 @@ public:
 protected:
     SH1106 *oled;
     FrameManager *frameManager;
+
+    void navControls();
 };

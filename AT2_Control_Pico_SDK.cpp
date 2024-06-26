@@ -7,7 +7,7 @@
 #include "pico/cyw43_arch.h"
 #include "SH1106.h"
 #include "Frame.h"
-#include "Tank.h"
+#include "TankStatusFrame.h"
 // #include "lfs.h"
 // #include <pfs.h>
 #include "FrameManager.h"
@@ -108,7 +108,7 @@ int main()
     oled.display();
 
     FrameManager frameManager = FrameManager(&oled);
-    frameManager.setFrame(new TankSelector(&oled, &frameManager));
+    frameManager.setFrame(new TankStatusFrame(&oled, &frameManager));
     frameManager.begin();
 
     oled.display();

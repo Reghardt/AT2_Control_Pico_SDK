@@ -5,8 +5,11 @@ project(FrameManager)
 add_library(FrameManager STATIC
     FrameManager.cpp
     Frame.cpp
-    Tank.cpp
-    FillWhen.cpp
+    TankStatusFrame.cpp
+    StartFillWhenFrame.cpp
+    StopFillWhenFrame.cpp
+    WaterDepthFrame.cpp
+    SensorHeightFrame.cpp
     TankSelector.cpp
 )
 

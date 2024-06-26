@@ -1,14 +1,15 @@
 #pragma once
 #include "Frame.h"
 #include "StartFillWhenFrame.h"
+#include "SensorHeightFrame.h"
 
-class TankSelector : public Frame
+class TankStatusFrame : public Frame
 {
 private:
     /* data */
 public:
-    TankSelector(SH1106 *oled, FrameManager *frameManager);
-    ~TankSelector();
+    TankStatusFrame(SH1106 *oled, FrameManager *frameManager);
+    ~TankStatusFrame();
 
     void render();
 

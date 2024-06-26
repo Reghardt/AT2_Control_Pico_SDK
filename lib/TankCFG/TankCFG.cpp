@@ -1,7 +1,7 @@
 #include "TankCFG.h"
 
 json TankCFG::cfg;
-const char *fileName = "TankCFG.json"; // string literals are automatically null terminated by the compiler
+const char *TankCFG::fileName = "TankCFG.json"; // string literals are automatically null terminated by the compiler
 
 void TankCFG::setAndSaveProperty(const char *propertyName, uint16_t value)
 {
@@ -18,30 +18,32 @@ void TankCFG::setAndSaveProperty(const char *propertyName, uint16_t value)
 
 uint16_t TankCFG::getProperty(const char *propertyName)
 {
-    if (cfg.empty())
-    {
-        loadCFG();
-    }
-    auto propertyValue = cfg.template get<uint16_t>();
+
+    loadCFG();
+
+    auto propertyValue = cfg[propertyName].template get<uint16_t>();
     return propertyValue;
 }
 
 void TankCFG::loadCFG()
 {
-    char *buffer = nullptr;
-    if (read(fileName, buffer) > 0)
+    if (cfg.empty())
     {
-        cfg = json::parse(buffer, nullptr, false);
-        if (cfg.is_discarded())
+        char *buffer = nullptr;
+        if (read(fileName, buffer) > 0)
         {
-            printf("Could not parse json from file.\n");
+            cfg = json::parse(buffer, nullptr, false);
+            if (cfg.is_discarded())
+            {
+                printf("Could not parse json from file.\n");
+                createDefaultCFG();
+            }
+            free(buffer);
+        }
+        else
+        {
             createDefaultCFG();
         }
-        free(buffer);
-    }
-    else
-    {
-        createDefaultCFG();
     }
 }
 
