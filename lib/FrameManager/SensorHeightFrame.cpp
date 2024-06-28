@@ -10,28 +10,85 @@ SensorHeightFrame::~SensorHeightFrame()
 
 void SensorHeightFrame::render()
 {
-    oled->drawCircle(40, 40, 8, 1);
-    oled->setTextColor(1);
-    oled->setTextSize(2);
-    oled->setCursor(0, 0);
-    oled->print("Sen Height");
+    oled->clearDisplay();
+    const char heading[] = "Sen Height";
 
-    navControls();
-
-    oled->display();
+    if (editMode)
+    {
+        oled->setTextColor(1);
+        oled->setTextSize(2);
+        oled->setCursor(0, 0);
+        oled->print(heading);
+        oled->write('\n');
+        oled->print(std::to_string(tempValue).c_str());
+        oled->print("cm");
+        oled->write('\n');
+        oled->setTextSize(1);
+        oled->print("(edit mode)");
+        editControls();
+        oled->display();
+    }
+    else
+    {
+        oled->setTextColor(1);
+        oled->setTextSize(2);
+        oled->setCursor(0, 0);
+        oled->print(heading);
+        oled->write('\n');
+        oled->print(std::to_string(TankCFG::getSensorHeight()).c_str());
+        oled->print("cm");
+        navControls();
+        oled->display();
+    }
 }
 
 void SensorHeightFrame::button0()
 {
-    this->frameManager->setFrame(new WaterDepthFrame(oled, frameManager));
+    if (editMode)
+    {
+        tempValue += 5;
+        render();
+    }
+    else
+    {
+        this->frameManager->setFrame(new WaterDepthFrame(oled, frameManager));
+    }
 }
 void SensorHeightFrame::button1()
 {
-    this->frameManager->setFrame(new TankStatusFrame(oled, frameManager));
+    if (editMode)
+    {
+        tempValue -= 5;
+        render();
+    }
+    else
+    {
+        this->frameManager->setFrame(new TankStatusFrame(oled, frameManager));
+    }
 }
 void SensorHeightFrame::button2()
 {
+    if (editMode)
+    {
+        TankCFG::setSensorHeight(tempValue);
+        this->editMode = false;
+        this->render();
+    }
+    else
+    {
+        tempValue = TankCFG::getSensorHeight();
+        this->editMode = true;
+        this->render();
+    }
 }
 void SensorHeightFrame::button3()
 {
+    if (editMode)
+    {
+        this->editMode = false;
+        this->render();
+    }
+    else
+    {
+    }
 }

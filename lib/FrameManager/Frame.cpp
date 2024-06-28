@@ -17,5 +17,19 @@ void Frame::navControls()
     oled->setCursor(30, 57);
     oled->write(0x19);
     oled->setCursor(70, 57);
-    oled->print("Sel");
+    oled->print("edit");
+}
+
+void Frame::editControls()
+{
+    oled->setTextColor(1);
+    oled->setTextSize(1);
+    oled->setCursor(0, 57);
+    oled->write('+');
+    oled->setCursor(30, 57);
+    oled->write('-');
+    oled->setCursor(70, 57);
+    oled->print("OK");
+    oled->setCursor(100, 57);
+    oled->print("cncl");
 }

@@ -10,6 +10,7 @@ TankSelector::~TankSelector()
 
 void TankSelector::render()
 {
+    oled->clearDisplay();
     oled->setTextColor(1);
     oled->setTextSize(2);
     oled->setCursor(0, 0);

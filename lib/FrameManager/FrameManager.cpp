@@ -33,7 +33,6 @@ void FrameManager::setFrame(Frame *frame)
     }
 
     this->frame = frame;
-    this->oled->clearDisplay();
     this->frame->render();
 }
 

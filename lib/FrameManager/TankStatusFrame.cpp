@@ -10,6 +10,7 @@ TankStatusFrame::~TankStatusFrame()
 
 void TankStatusFrame::render()
 {
+    oled->clearDisplay();
     oled->drawCircle(40, 40, 8, 1);
     oled->setTextColor(1);
     oled->setTextSize(2);

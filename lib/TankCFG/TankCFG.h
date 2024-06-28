@@ -19,8 +19,8 @@ private:
     static void createDefaultCFG();
 
 public:
-    static void setStartFillWhen(uint8_t fillWhen);
-    static void setStopFillWhen(uint8_t stopFillWhen);
+    static void setStartFillWhen(uint16_t fillWhen);
+    static void setStopFillWhen(uint16_t stopFillWhen);
     static void setWaterDepth(uint16_t waterDepth);
     static void setSensorHeight(uint16_t sensorHeight);
 

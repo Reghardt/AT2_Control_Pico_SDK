@@ -10,27 +10,85 @@ WaterDepthFrame::~WaterDepthFrame()
 
 void WaterDepthFrame::render()
 {
-    oled->drawCircle(40, 40, 8, 1);
-    oled->setTextColor(1);
-    oled->setTextSize(2);
-    oled->setCursor(0, 0);
-    oled->print("WaterDepth");
+    oled->clearDisplay();
+    const char heading[] = "WaterDepth";
 
-    navControls();
-    oled->display();
+    if (editMode)
+    {
+        oled->setTextColor(1);
+        oled->setTextSize(2);
+        oled->setCursor(0, 0);
+        oled->print(heading);
+        oled->write('\n');
+        oled->print(std::to_string(tempValue).c_str());
+        oled->print("cm");
+        oled->write('\n');
+        oled->setTextSize(1);
+        oled->print("(edit mode)");
+        editControls();
+        oled->display();
+    }
+    else
+    {
+        oled->setTextColor(1);
+        oled->setTextSize(2);
+        oled->setCursor(0, 0);
+        oled->print(heading);
+        oled->write('\n');
+        oled->print(std::to_string(TankCFG::getStartFillWhen()).c_str());
+        oled->print("cm");
+        navControls();
+        oled->display();
+    }
 }
 
 void WaterDepthFrame::button0()
 {
-    this->frameManager->setFrame(new StopFillWhenFrame(oled, frameManager));
+    if (editMode)
+    {
+        tempValue += 5;
+        render();
+    }
+    else
+    {
+        this->frameManager->setFrame(new StopFillWhenFrame(oled, frameManager));
+    }
 }
 void WaterDepthFrame::button1()
 {
-    this->frameManager->setFrame(new SensorHeightFrame(oled, frameManager));
+    if (editMode)
+    {
+        tempValue -= 5;
+        render();
+    }
+    else
+    {
+        this->frameManager->setFrame(new SensorHeightFrame(oled, frameManager));
+    }
 }
 void WaterDepthFrame::button2()
 {
+    if (editMode)
+    {
+        TankCFG::setWaterDepth(tempValue);
+        this->editMode = false;
+        this->render();
+    }
+    else
+    {
+        tempValue = TankCFG::getWaterDepth();
+        this->editMode = true;
+        this->render();
+    }
 }
 void WaterDepthFrame::button3()
 {
+    if (editMode)
+    {
+        this->editMode = false;
+        this->render();
+    }
+    else
+    {
+    }
 }

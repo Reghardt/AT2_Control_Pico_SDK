@@ -58,11 +58,11 @@ void TankCFG::createDefaultCFG()
     write(fileName, cfgDump.c_str(), cfgDump.length());
 }
 
-void TankCFG::setStartFillWhen(uint8_t fillWhen)
+void TankCFG::setStartFillWhen(uint16_t fillWhen)
 {
     setAndSaveProperty("startFillWhen", fillWhen);
 }
-void TankCFG::setStopFillWhen(uint8_t stopFillWhen)
+void TankCFG::setStopFillWhen(uint16_t stopFillWhen)
 {
     setAndSaveProperty("stopFillWhen", stopFillWhen);
 }

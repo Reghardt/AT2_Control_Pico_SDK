@@ -1,6 +1,8 @@
 #pragma once
 #include "SH1106.h"
 #include "FrameManager.h"
+#include "TankCFG.h"
+#include <string>
 
 class FrameManager;
 
@@ -23,4 +25,8 @@ protected:
     FrameManager *frameManager;
 
     void navControls();
+    void editControls();
+
+    bool editMode = false;
+    uint16_t tempValue = 0;
 };
