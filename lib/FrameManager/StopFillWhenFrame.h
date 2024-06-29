@@ -7,6 +7,9 @@ class StopFillWhenFrame : public Frame
 {
 private:
     /* data */
+    const uint16_t step = 5;
+    uint16_t startFillWhenValue = 0;
+
 public:
     StopFillWhenFrame(SH1106 *oled, FrameManager *frameManager);
     ~StopFillWhenFrame();

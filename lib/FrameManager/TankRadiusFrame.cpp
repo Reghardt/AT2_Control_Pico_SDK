@@ -1,18 +1,17 @@
-#include "StopFillWhenFrame.h"
+#include "TankRadiusFrame.h"
 
-StopFillWhenFrame::StopFillWhenFrame(SH1106 *oled, FrameManager *frameManager) : Frame::Frame(oled, frameManager)
-{
-    startFillWhenValue = TankCFG::getStartFillWhen();
-}
-
-StopFillWhenFrame::~StopFillWhenFrame()
+TankRadiusFrame::TankRadiusFrame(SH1106 *oled, FrameManager *frameManager) : Frame::Frame(oled, frameManager)
 {
 }
 
-void StopFillWhenFrame::render()
+TankRadiusFrame::~TankRadiusFrame()
+{
+}
+
+void TankRadiusFrame::render()
 {
     oled->clearDisplay();
-    const char heading[] = "EndFillAt";
+    const char heading[] = "Radius";
 
     if (editMode)
     {
@@ -22,7 +21,7 @@ void StopFillWhenFrame::render()
         oled->print(heading);
         oled->write('\n');
         oled->print(std::to_string(tempValue).c_str());
-        oled->write('%');
+        oled->print("cm");
         oled->write('\n');
         oled->setTextSize(1);
         oled->print("(edit mode)");
@@ -36,38 +35,30 @@ void StopFillWhenFrame::render()
         oled->setCursor(0, 0);
         oled->print(heading);
         oled->write('\n');
-        oled->print(std::to_string(TankCFG::getStopFillWhen()).c_str());
-        oled->write('%');
+        oled->print(std::to_string(TankCFG::getTankRadius()).c_str());
+        oled->print("cm");
         navControls();
         oled->display();
     }
 }
 
-void StopFillWhenFrame::button0()
+void TankRadiusFrame::button0()
 {
     if (editMode)
     {
-        if ((tempValue + step) >= 100)
-        {
-            tempValue = 100;
-        }
-        else
-        {
-            tempValue += step;
-        }
+        tempValue += step;
         render();
     }
     else
     {
-        this->frameManager->setFrame(new StartFillWhenFrame(oled, frameManager));
+        this->frameManager->setFrame(new SensorHeightFrame(oled, frameManager));
     }
 }
-
-void StopFillWhenFrame::button1()
+void TankRadiusFrame::button1()
 {
     if (editMode)
     {
-        if ((tempValue - step) >= (startFillWhenValue + step))
+        if ((tempValue - step) >= step)
         {
             tempValue -= step;
         }
@@ -75,27 +66,25 @@ void StopFillWhenFrame::button1()
     }
     else
     {
-        this->frameManager->setFrame(new WaterDepthFrame(oled, frameManager));
+        this->frameManager->setFrame(new TankStatusFrame(oled, frameManager));
     }
 }
-
-void StopFillWhenFrame::button2()
+void TankRadiusFrame::button2()
 {
     if (editMode)
     {
-        TankCFG::setStopFillWhen(tempValue);
+        TankCFG::setTankRadius(tempValue);
         this->editMode = false;
         this->render();
     }
     else
     {
-        tempValue = TankCFG::getStopFillWhen();
+        tempValue = TankCFG::getTankRadius();
         this->editMode = true;
         this->render();
     }
 }
-
-void StopFillWhenFrame::button3()
+void TankRadiusFrame::button3()
 {
     if (editMode)
     {

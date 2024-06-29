@@ -2,6 +2,7 @@
 
 WaterDepthFrame::WaterDepthFrame(SH1106 *oled, FrameManager *frameManager) : Frame(oled, frameManager)
 {
+    sensorHeightValue = TankCFG::getSensorHeight();
 }
 
 WaterDepthFrame::~WaterDepthFrame()
@@ -35,7 +36,7 @@ void WaterDepthFrame::render()
         oled->setCursor(0, 0);
         oled->print(heading);
         oled->write('\n');
-        oled->print(std::to_string(TankCFG::getStartFillWhen()).c_str());
+        oled->print(std::to_string(TankCFG::getWaterDepth()).c_str());
         oled->print("cm");
         navControls();
         oled->display();
@@ -46,7 +47,10 @@ void WaterDepthFrame::button0()
 {
     if (editMode)
     {
-        tempValue += 5;
+        if (tempValue + step + sensorHeightValue <= 450)
+        {
+            tempValue += step;
+        }
         render();
     }
     else
@@ -58,7 +62,14 @@ void WaterDepthFrame::button1()
 {
     if (editMode)
     {
-        tempValue -= 5;
+        if ((tempValue - step) <= 30)
+        {
+            tempValue = 30;
+        }
+        else
+        {
+            tempValue -= 5;
+        }
         render();
     }
     else

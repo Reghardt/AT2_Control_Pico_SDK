@@ -11,6 +11,7 @@ add_library(FrameManager STATIC
     WaterDepthFrame.cpp
     SensorHeightFrame.cpp
     TankSelector.cpp
+    TankRadiusFrame.cpp
 )
 
 # Inherit the include directories from the Pico SDK

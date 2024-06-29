@@ -2,6 +2,7 @@
 
 SensorHeightFrame::SensorHeightFrame(SH1106 *oled, FrameManager *frameManager) : Frame(oled, frameManager)
 {
+    waterDepthValue = TankCFG::getWaterDepth();
 }
 
 SensorHeightFrame::~SensorHeightFrame()
@@ -46,7 +47,10 @@ void SensorHeightFrame::button0()
 {
     if (editMode)
     {
-        tempValue += 5;
+        if (tempValue + step + waterDepthValue <= 450)
+        {
+            tempValue += step;
+        }
         render();
     }
     else
@@ -58,12 +62,19 @@ void SensorHeightFrame::button1()
 {
     if (editMode)
     {
-        tempValue -= 5;
+        if ((tempValue - step) <= 20)
+        {
+            tempValue = 20;
+        }
+        else
+        {
+            tempValue -= step;
+        }
         render();
     }
     else
     {
-        this->frameManager->setFrame(new TankStatusFrame(oled, frameManager));
+        this->frameManager->setFrame(new TankRadiusFrame(oled, frameManager));
     }
 }
 void SensorHeightFrame::button2()

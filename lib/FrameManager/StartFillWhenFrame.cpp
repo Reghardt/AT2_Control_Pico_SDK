@@ -2,6 +2,7 @@
 
 StartFillWhenFrame::StartFillWhenFrame(SH1106 *oled, FrameManager *frameManager) : Frame::Frame(oled, frameManager)
 {
+    stopFillWhenValue = TankCFG::getStopFillWhen();
 }
 
 StartFillWhenFrame::~StartFillWhenFrame()
@@ -46,7 +47,10 @@ void StartFillWhenFrame::button0()
 {
     if (editMode)
     {
-        tempValue += 5;
+        if ((tempValue + step) <= (stopFillWhenValue - step))
+        {
+            tempValue += step;
+        }
         render();
     }
     else
@@ -58,7 +62,14 @@ void StartFillWhenFrame::button1()
 {
     if (editMode)
     {
-        tempValue -= 5;
+        if ((tempValue - step) <= 0)
+        {
+            tempValue = 0;
+        }
+        else
+        {
+            tempValue -= step;
+        }
         render();
     }
     else

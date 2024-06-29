@@ -1,7 +1,7 @@
 #pragma once
 #include "Frame.h"
 #include "StartFillWhenFrame.h"
-#include "SensorHeightFrame.h"
+#include "TankRadiusFrame.h"
 
 class TankStatusFrame : public Frame
 {
