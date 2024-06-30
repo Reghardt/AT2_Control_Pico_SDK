@@ -48,7 +48,10 @@ add_subdirectory(lib/FrameManager)
 add_subdirectory(lib/json)
 add_subdirectory(lib/PLFS)
 add_subdirectory(lib/TankCFG)
+add_subdirectory(lib/TankState)
 add_executable(AT2_Control_Pico_SDK AT2_Control_Pico_SDK.cpp)
+
+
 
 pico_set_program_name(AT2_Control_Pico_SDK "AT2_Control_Pico_SDK")
 pico_set_program_version(AT2_Control_Pico_SDK "0.1")
@@ -82,6 +85,7 @@ target_link_libraries(AT2_Control_Pico_SDK
         FrameManager
         PLFS
         TankCFG
+        TankState
         )
 
 pico_add_extra_outputs(AT2_Control_Pico_SDK)

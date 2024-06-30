@@ -6,7 +6,7 @@
 class TankRadiusFrame : public Frame
 {
 private:
-    const uint16_t step = 5;
+    const uint16_t step = 1;
 
 public:
     TankRadiusFrame(SH1106 *oled, FrameManager *frameManager);

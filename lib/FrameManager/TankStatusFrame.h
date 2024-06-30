@@ -2,6 +2,7 @@
 #include "Frame.h"
 #include "StartFillWhenFrame.h"
 #include "TankRadiusFrame.h"
+#include "TankState.h"
 
 class TankStatusFrame : public Frame
 {
