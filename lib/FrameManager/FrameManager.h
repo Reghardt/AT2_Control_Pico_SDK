@@ -16,6 +16,8 @@ private:
     uint32_t lastPress;
     SH1106 *oled;
 
+    bool shouldUpdate = false;
+
 public:
     FrameManager(SH1106 *oled);
     ~FrameManager();
@@ -23,4 +25,5 @@ public:
     void begin();
     void setFrame(Frame *frame);
     void tick();
+    void update();
 };

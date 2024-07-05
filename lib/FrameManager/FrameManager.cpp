@@ -38,6 +38,14 @@ void FrameManager::setFrame(Frame *frame)
 
 void FrameManager::tick()
 {
+    // frame->update();
+
+    if (shouldUpdate)
+    {
+        frame->render();
+        shouldUpdate = false;
+        return;
+    }
     uint32_t currentTime = time_us_32();
     if (currentTime - lastPress >= 400000) // 0.4 seconds
     {
@@ -66,4 +74,10 @@ void FrameManager::tick()
             lastPress = currentTime;
         }
     }
+}
+
+void FrameManager::update()
+{
+    // frame->update();
+    shouldUpdate = true;
 }

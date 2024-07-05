@@ -33,3 +33,7 @@ void Frame::editControls()
     oled->setCursor(100, 57);
     oled->print("cncl");
 }
+
+// void Frame::update()
+// {
+// }

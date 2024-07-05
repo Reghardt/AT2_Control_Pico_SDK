@@ -4,6 +4,7 @@ bool TankState::awaitingFirstReading = true;
 uint16_t TankState::currentPercentage = 0;
 uint16_t TankState::currentLiters = 0;
 uint8_t TankState::mode = 0;
+bool TankState::pumpState = false;
 
 TankState::TankState(/* args */)
 {
@@ -46,4 +47,15 @@ uint8_t TankState::getMode()
 void TankState::setMode(uint8_t newMode)
 {
     mode = newMode;
+}
+
+void TankState::setPumpState(bool newPumpState)
+{
+    pumpState = newPumpState;
+    gpio_put(20, newPumpState);
+}
+
+bool TankState::getPumpState()
+{
+    return pumpState;
 }

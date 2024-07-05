@@ -16,6 +16,7 @@
 #include "hardware/gpio.h"
 #include "TankSelector.h"
 #include "TankCFG.h"
+#include "TankState.h"
 
 using json = nlohmann::json;
 
@@ -38,6 +39,7 @@ using json = nlohmann::json;
 
 SH1106 oled = SH1106(i2c1, OLED_I2C_ADDR, OLED_WIDTH, OLED_HEIGHT);
 LoRa loRa = LoRa(spi1, LORA_CS_PIN, LORA_RST_PIN, LORA_DIO0_PIN);
+FrameManager frameManager = FrameManager(&oled);
 // TankCFG tankCFG = TankCFG();
 
 void gpio_irq_callback(uint gpio, uint32_t events)
@@ -66,9 +68,43 @@ void loraOnReceive(int packetSize)
     else
     {
         printf("\nAccepted\n");
+        auto reading = j_from_msgpack["r"].template get<uint16_t>();
+        printf("r: %i\n", reading);
+        TankState::calculateLevel(reading);
+
         printf("%s\n", j_from_msgpack.dump().c_str());
         printf("RSSI: %d\n", loRa.packetRssi());
         printf("SNR : %d\n", loRa.packetSnr());
+
+        if (TankState::getMode() == 1) // 0 = OFF, 1 = AUTO, 2 = FILL & AUTO, 3 = FILL & OFF
+        {
+            if (TankState::getCurrentPercentage() >= TankCFG::getStopFillWhen() && TankState::getPumpState() == true)
+            {
+                TankState::setPumpState(false);
+            }
+            else if (TankState::getCurrentPercentage() <= TankCFG::getStartFillWhen() && TankState::getPumpState() == false)
+            {
+                TankState::setPumpState(true);
+            }
+        }
+        else if (TankState::getMode() == 2) // FILL & AUTO
+        {
+            if (TankState::getCurrentPercentage() >= TankCFG::getStopFillWhen() && TankState::getPumpState() == true)
+            {
+                TankState::setPumpState(false); // pump off when done
+                TankState::setMode(1);          // SYS AUTO when done
+            }
+        }
+        else if (TankState::getMode() == 3) // FILL & OFF
+        {
+            if (TankState::getCurrentPercentage() >= TankCFG::getStopFillWhen() && TankState::getPumpState() == true)
+            {
+                TankState::setPumpState(false); // pump off when done
+                TankState::setMode(0);          // SYS OFF when done
+            }
+        }
+
+        frameManager.update();
     }
 }
 
@@ -76,6 +112,9 @@ int main()
 {
     stdio_init_all();
     // tankCFG.begin();
+
+    gpio_set_function(20, GPIO_FUNC_SIO);
+    gpio_set_dir(20, GPIO_OUT);
 
     printf("Start fill when: %u\n", TankCFG::getStartFillWhen());
     printf("Stop fill when: %u\n", TankCFG::getStopFillWhen());
@@ -107,7 +146,6 @@ int main()
     oled.begin();
     oled.display();
 
-    FrameManager frameManager = FrameManager(&oled);
     frameManager.setFrame(new TankStatusFrame(&oled, &frameManager));
     frameManager.begin();
 

@@ -20,6 +20,8 @@ public:
     virtual void button2() = 0;
     virtual void button3() = 0;
 
+    // virtual void update();
+
 protected:
     SH1106 *oled;
     FrameManager *frameManager;

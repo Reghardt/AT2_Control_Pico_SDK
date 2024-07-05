@@ -1,3 +1,6 @@
+#pragma once
+#include "LoRa.h"
+
 class Radio
 {
 private:

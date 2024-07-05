@@ -12,11 +12,13 @@ private:
 
     /**
      * 0 = off
-     * 1 = fill & off
+     * 1 = auto
      * 2 = fill & auto
-     * 3 = auto
+     * 3 = fill & off
+     *
      */
     static uint8_t mode;
+    static bool pumpState;
 
 public:
     TankState();
@@ -30,4 +32,8 @@ public:
     static uint8_t getMode();
 
     static void setMode(uint8_t newMode);
+
+    static void setPumpState(bool newPumpState);
+
+    static bool getPumpState();
 };
