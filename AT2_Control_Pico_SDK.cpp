@@ -73,8 +73,8 @@ void loraOnReceive(int packetSize)
         TankState::calculateLevel(reading);
 
         printf("%s\n", j_from_msgpack.dump().c_str());
-        printf("RSSI: %d\n", loRa.packetRssi());
-        printf("SNR : %d\n", loRa.packetSnr());
+        // printf("RSSI: %d\n", loRa.packetRssi());
+        // printf("SNR : %d\n", loRa.packetSnr());
 
         if (TankState::getMode() == 1) // 0 = OFF, 1 = AUTO, 2 = FILL & AUTO, 3 = FILL & OFF
         {

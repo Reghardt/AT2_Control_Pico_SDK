@@ -9,6 +9,7 @@ private:
     static bool awaitingFirstReading;
     static uint16_t currentPercentage;
     static uint16_t currentLiters;
+    static uint16_t lastDepthMeasurement;
 
     /**
      * 0 = off

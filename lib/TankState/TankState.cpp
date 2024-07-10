@@ -5,6 +5,7 @@ uint16_t TankState::currentPercentage = 0;
 uint16_t TankState::currentLiters = 0;
 uint8_t TankState::mode = 0;
 bool TankState::pumpState = false;
+uint16_t TankState::lastDepthMeasurement = 0;
 
 TankState::TankState(/* args */)
 {
@@ -26,8 +27,25 @@ uint16_t TankState::getCurrentLiters()
 
 void TankState::calculateLevel(uint16_t reading)
 {
-    float senReading_heightAdjusted = TankCFG::getWaterDepth() - (reading - TankCFG::getSensorHeight());
-    float prePercentage = (senReading_heightAdjusted / TankCFG::getWaterDepth());
+    uint16_t depthMeasurement = TankCFG::getWaterDepth() - (reading - TankCFG::getSensorHeight());
+    uint16_t adjustedDepthMeasurement;
+    if (lastDepthMeasurement == 0)
+    {
+        adjustedDepthMeasurement = depthMeasurement;
+    }
+    else if (lastDepthMeasurement != depthMeasurement)
+    {
+        if (depthMeasurement > lastDepthMeasurement)
+        {
+            adjustedDepthMeasurement = lastDepthMeasurement + 1;
+        }
+        else
+        {
+            adjustedDepthMeasurement = lastDepthMeasurement - 1;
+        }
+    }
+
+    float prePercentage = ((float)adjustedDepthMeasurement / (float)TankCFG::getWaterDepth());
     currentPercentage = prePercentage * 100;
 
     printf("Pre percentage %f\n", prePercentage);

@@ -50,6 +50,7 @@
         "ranges": "cpp",
         "span": "cpp",
         "regex": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "chrono": "cpp"
     }
 }
